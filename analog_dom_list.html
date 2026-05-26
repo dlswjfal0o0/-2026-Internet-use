@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>인터넷활용 실습 템플릿</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+        /* 외부 style.css의 픽셀 폰트와 배경을 유지하기 위해 body 스타일 제거 */
+        
+        ul#commentList {
+            list-style-type: none; /* 기본 불릿 제거 */
+            padding: 0;
+            margin-top: 15px;
+        }
+        
+        /* 댓글 항목을 윈도우 입력창(음각) 혹은 문서 리스트 스타일로 변경 */
+        ul#commentList li {
+            background-color: #ffffff; /* 흰색 바탕 */
+            color: #000000;
+            margin: 8px 0;
+            padding: 8px 12px;
+            
+            /* 고전 OS 특유의 안으로 파인 듯한 입체 테두리 효과 */
+            border: 2px solid #000000;
+            border-bottom-color: #ffffff;
+            border-right-color: #ffffff;
+            
+            /* 정렬 및 요소 간격 조절 */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        /* 마우스 올렸을 때 옛날 에러나 경고창 선택 느낌의 반전 효과 (선택 사항) */
+        ul#commentList li:hover {
+            background-color: #f1f1f1; 
+        }
+
+        /* 입체감 있는 레트로 구분선 스타일 */
+        hr {
+            border: 0;
+            border-top: 2px solid #808080;
+            border-bottom: 2px solid #ffffff;
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+<body onload="addComment()">
+<header>
+  <h1>이름: 박예인</h1>
+  <p class="subtitle">한 줄 소개: 26학번</p>
+</header>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="contact.html">Contact</a>
+</nav>
+<main class="container">
+<section>
+    <h3>실습 2: 댓글 추가/삭제 프로그램</h3>
+    <p>아래 삭제 버튼을 클릭하면 해당 항목이 삭제됩니다.</p>
+    <hr>
+
+    <button onclick="addComment()">+ 댓글 추가하기</button>
+
+    <ul id="commentList">
+        </ul>
+
+ <script>
+    function addComment() {
+        // 1. 사용자 입력 받기
+        var inputStr = prompt("추가할 댓글 내용을 입력하세요:", "오늘 수업 너무 재밌어요!");
+
+        // 취소 버튼을 누르거나 내용이 없으면 종료
+        if (inputStr == null || inputStr.trim() == "") {
+            return; 
+        }
+
+        // 2. 부모 요소(ul) 찾기
+        var parent = document.getElementById("commentList");
+
+        // 3. 새로운 요소(li) 생성
+        var newLi = document.createElement("li");
+        
+        // --------------------------------------------------
+        // [추가 기능 1] 댓글 내용을 담을 공간
+        // --------------------------------------------------
+        var textSpan = document.createElement("span");
+        textSpan.innerHTML = inputStr + " "; 
+
+        // --------------------------------------------------
+        // [추가 기능 2] 작성 시간 표시 기능
+        // --------------------------------------------------
+        var timeSpan = document.createElement("span");
+        var now = new Date(); 
+        var timeString = now.toLocaleTimeString(); 
+        timeSpan.innerHTML = "[" + timeString + "] ";
+        timeSpan.style.color = "#808080"; // 레트로 감성에 어울리는 고전 회색 세팅
+        timeSpan.style.fontSize = "0.85em";
+
+        // --------------------------------------------------
+        // [추가 기능 3] 이모티콘(좋아요) 기능
+        // --------------------------------------------------
+        var emojiBtn = document.createElement("button");
+        var likeCount = 0; 
+        emojiBtn.innerHTML = "👍 " + likeCount;
+        emojiBtn.onclick = function() {
+            likeCount++; 
+            emojiBtn.innerHTML = "👍 " + likeCount;
+        };
+
+        // --------------------------------------------------
+        // [추가 기능 4] 댓글 수정 기능
+        // --------------------------------------------------
+        var editBtn = document.createElement("button");
+        editBtn.innerHTML = "수정";
+        editBtn.onclick = function() {
+            var newText = prompt("댓글을 수정하세요:", textSpan.innerHTML.trim());
+            if (newText != null && newText.trim() != "") {
+                textSpan.innerHTML = newText + " ";
+            }
+        };
+
+        // --------------------------------------------------
+        // 댓글 삭제 기능
+        // --------------------------------------------------
+        var deleteBtn = document.createElement("button");
+        deleteBtn.innerHTML = "삭제";
+        deleteBtn.onclick = function() {
+            parent.removeChild(newLi); 
+        };
+
+        // 4. 생성한 요소들을 li 안에 차곡차곡 조립하기 (Append)
+        newLi.appendChild(textSpan);  
+        newLi.appendChild(timeSpan);  
+        newLi.appendChild(emojiBtn);  
+        newLi.appendChild(editBtn);   
+        newLi.appendChild(deleteBtn); 
+
+        // 5. 완성된 li를 화면(ul)에 추가하기
+        parent.appendChild(newLi);
+    }
+</script>
+</section>
+</main>
+<footer>
+  <small>&copy; <span id="year"></span> 이름: 박예인</small>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
