@@ -50,14 +50,14 @@
       document.write("<h3>목표 날짜: " + targetDate.toLocaleString() + "</h3>"); 
 
       if (diffDay === 0) {
-        // D-Day일 때: 파란색(blue) 적용
-        document.write("<h3 style='color: blue;'> D-Day 입니다!</h3>");
+        // D-Day일 때: 'D-Day' 부분만 파란색으로 감싸기
+        document.write("<h3><span style='color: #4169E1;'>D-Day</span> 입니다!</h3>");
       } else if (diffDay > 0) {
-        // D- 남았을 때: 파란색(blue) 적용
-        document.write("<h3 style='color: blue;'> D-" + diffDay + "일 남았습니다.</h3>");
+        // D- 남았을 때: 'D-숫자' 부분만 파란색으로 감싸기
+        document.write("<h3><span style='color: #4169E1;'>D-" + diffDay + "</span>일 남았습니다.</h3>");
       } else {
-        // D+ 지났을 때: 빨간색(red) 적용
-        document.write("<h3 style='color: red;'> D+" + Math.abs(diffDay) + "일 지났습니다.</h3>"); 
+        // D+ 지났을 때: 'D+숫자' 부분만 빨간색으로 감싸기
+        document.write("<h3><span style='color: #FF6347;'>D+" + Math.abs(diffDay) + "</span>일 지났습니다.</h3>"); 
       }
 
       document.write("<hr>");
