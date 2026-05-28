@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>인터넷활용 실습 템플릿</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* 레트로 감성 뽑기 상자 CSS (style.css에 넣어도 됩니다) */
+    .retro-container {
+      border: 4px solid #000;
+      background-color: #c0c0c0; /* 옛날 윈도우 느낌의 회색 */
+      padding: 20px;
+      font-family: 'Courier New', Courier, monospace;
+      box-shadow: 4px 4px 0px #000;
+      margin-bottom: 20px;
+    }
+    
+    #gacha-screen {
+      background-color: #000;
+      color: #0f0; /* 터미널 느낌의 형광 연두색 */
+      padding: 30px;
+      margin-top: 15px;
+      border: inset 4px #888;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      min-height: 40px;
+    }
+
+    /* 결과가 나왔을 때 깜빡거리는 효과 */
+    .blink {
+      animation: blinker 0.4s linear infinite;
+      color: #ffeb3b; /* 최종 결과는 노란색으로 강조 */
+    }
+    @keyframes blinker {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>이름: 박예인</h1>
+  <p class="subtitle">한 줄 소개: 26학번</p>
+</header>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="contact.html">Contact</a>
+</nav>
+<main class="container">
+<section>
+  <h2>메뉴 랜덤 뽑기</h2>
+  
+  <div class="retro-container">
+    <div id="input-info">대기 중...</div>
+    <div id="gacha-screen">? ? ?</div>
+  </div>
+  <p><i>새로고침(F5)을 눌러 다시 뽑을 수 있습니다.</i></p>
+  
+  <script>
+    // 1. String: prompt()로 사용자에게 '문자열' 입력받기
+    let defaultList = "제육볶음,돈까스,순대국,김치찌개,햄버거,초밥,파스타,샐러드,떡볶이,마라탕";
+    let inputString = prompt("메뉴를 콤마(,)로 구분하여 입력하세요", defaultList);
+
+    // 결과를 표시할 HTML 요소(태그)들을 가져옵니다.
+    let inputInfo = document.getElementById("input-info");
+    let gachaScreen = document.getElementById("gacha-screen");
+
+    // 사용자가 '취소'를 누른 경우
+    if (!inputString) {
+      inputInfo.innerHTML = "<h3>뽑기를 취소했습니다.</h3>";
+      gachaScreen.innerHTML = "-";
+    } else {
+      
+      // 2. Array: String.split(',') 메소드로 '문자열'을 '배열'로 변환
+      let items = inputString.split(','); 
+      inputInfo.innerHTML = "<strong>입력한 항목 (총 " + items.length + "개):</strong><br>" + inputString;
+
+      // 애니메이션을 위한 변수 설정
+      let spinCount = 0;
+      let maxSpins = 30; // 글자가 바뀌는 횟수 (이 숫자가 클수록 애니메이션이 길어집니다)
+      
+      // 3. setInterval을 이용해 0.05초(50ms)마다 글자를 무작위로 바꿈 (슬롯머신 효과)
+      let spinInterval = setInterval(function() {
+        // 배열에서 임시로 랜덤한 항목 하나를 고름
+        let tempIndex = Math.floor(Math.random() * items.length); 
+        gachaScreen.innerHTML = items[tempIndex].trim();
+        spinCount++;
+
+        // 정해진 횟수(maxSpins)만큼 글자가 바뀌면 애니메이션 종료하고 최종 결과 출력
+        if (spinCount >= maxSpins) {
+          clearInterval(spinInterval); // 애니메이션 멈춤
+          
+          // 최종 랜덤 인덱스 뽑기
+          let finalIndex = Math.floor(Math.random() * items.length); 
+          let choice = items[finalIndex].trim();
+          
+          // 최종 결과 출력 (깜빡임 효과 클래스 추가)
+          gachaScreen.innerHTML = "<span class='blink'>🎉 " + choice + " !!!! 🎉</span>";
+        }
+      }, 50); // 50ms 마다 실행
+    }
+  </script>
+
+</section>
+</main>
+<footer>
+  <small>&copy; <span id="year">2026</span> 이름: 박예인</small>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
