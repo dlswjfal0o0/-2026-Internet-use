@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>인터넷활용 실습 템플릿</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* 트랙(자동차가 움직일 박스) 스타일 */
+    #track {
+        position: relative; 
+        width: 100%;
+        max-width: 600px;   
+        height: 400px;      
+        background-color: #d1d8e0; 
+        border: 4px dashed #4b6584; 
+        margin: 20px 0;
+        border-radius: 10px;
+        overflow: hidden; 
+    }
+
+    /* 자동차 스타일 */
+    #car {
+        position: absolute; 
+        left: 0px;        
+        top: 0px;         
+        width: 50px; 
+        height: 50px;
+        font-size: 40px; 
+        line-height: 50px;
+        text-align: center;
+        text-shadow: 2px 2px 0px rgba(0,0,0,0.5); 
+        transition: transform 0.1s ease; 
+        z-index: 10;
+        transform: scaleX(1); 
+    }
+
+    /* 아이템(기름통) 스타일 */
+    #item {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        font-size: 30px;
+        line-height: 40px;
+        text-align: center;
+        text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+        z-index: 5;
+    }
+    
+    /* 상태 정보(좌표, 점수) 박스 스타일 */
+    #info {
+        display: inline-block;
+        padding: 10px 20px; 
+        background: #eee; 
+        border: 2px solid #aaa;
+        font-weight: bold;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>이름: 박예인</h1>
+  <p class="subtitle">한 줄 소개: 26학번</p>
+</header>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="contact.html">Contact</a>
+</nav>
+<main class="container">
+<section>
+  <h3>실습 6: 키보드 자동차 (기름통 먹기 게임)</h3>
+    <p>방향키(←, ↑, →, ↓)를 눌러 기름통을 획득해 점수를 올려보세요!</p>
+    
+    <div id="track">
+        <div id="car">🚙</div>
+        <div id="item">🛢️</div>
+    </div>
+    
+    <div id="info">현재 좌표 (x, y) = (0, 0) &nbsp;|&nbsp; 🏆 점수: 0</div>
+</section>
+</main>
+<footer>
+  <small>&copy; <span id="year"></span> 이름: 박예인</small>
+</footer>
+<script src="script.js"></script>
+
+<script>
+    var x = 0; // 자동차 x좌표
+    var y = 0; // 자동차 y좌표
+    var step = 15; // 이동 속도
+    var score = 0; // 점수
+
+    var itemX = 0; // 기름통 x좌표
+    var itemY = 0; // 기름통 y좌표
+
+    window.onload = function() {
+        var car = document.getElementById("car");
+        var track = document.getElementById("track");
+        var item = document.getElementById("item");
+        var info = document.getElementById("info");
+
+        // 자동차, 기름통 크기 고정값 (충돌 계산용)
+        var carSize = 50;
+        var itemSize = 40;
+
+        // 기름통을 랜덤한 위치로 보내는 함수
+        function spawnItem() {
+            var trackWidth = track.clientWidth;
+            var trackHeight = track.clientHeight;
+
+            // 트랙 크기 안에서 아이템이 바깥으로 나가지 않게 무작위 좌표 생성
+            itemX = Math.floor(Math.random() * (trackWidth - itemSize));
+            itemY = Math.floor(Math.random() * (trackHeight - itemSize));
+
+            item.style.left = itemX + "px";
+            item.style.top = itemY + "px";
+        }
+
+        // 초기 세팅
+        car.style.left = x + "px";
+        car.style.top = y + "px";
+        car.style.transform = "scaleX(1)"; 
+        spawnItem(); // 게임 시작 시 기름통 배치
+
+        document.onkeydown = function(e) {
+            // 스크롤 방지
+            if([37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+                e.preventDefault();
+            }
+
+            var trackWidth = track.clientWidth;
+            var trackHeight = track.clientHeight;
+
+            // 1. 자동차 이동 및 이탈 방지
+            switch(e.keyCode) {
+                case 37: // [왼쪽]
+                    x -= step;
+                    car.style.transform = "scaleX(1)"; 
+                    if (x < 0) x = 0; 
+                    break;
+                case 38: // [위쪽]
+                    y -= step;
+                    car.style.transform = "rotate(90deg)"; 
+                    if (y < 0) y = 0; 
+                    break;
+                case 39: // [오른쪽]
+                    x += step;
+                    car.style.transform = "scaleX(-1)"; 
+                    if (x > trackWidth - carSize) x = trackWidth - carSize; 
+                    break;
+                case 40: // [아래쪽]
+                    y += step;
+                    car.style.transform = "rotate(-90deg)"; 
+                    if (y > trackHeight - carSize) y = trackHeight - carSize; 
+                    break;
+            }
+
+            // 좌표 적용
+            car.style.left = x + "px";
+            car.style.top = y + "px";
+
+            // 2. 충돌 감지 (자동차 영역과 기름통 영역이 겹치는지 확인)
+            if (x < itemX + itemSize && 
+                x + carSize > itemX && 
+                y < itemY + itemSize && 
+                y + carSize > itemY) {
+                
+                // 충돌했다면(먹었다면) 점수 증가 및 새 위치로 이동
+                score += 10; // 한 번 먹을 때마다 10점씩
+                spawnItem();
+            }
+
+            // 3. 상태 정보 갱신
+            info.innerHTML = "현재 좌표 (x, y) = (" + x + ", " + y + ") &nbsp;|&nbsp; 🏆 점수: " + score;
+        }
+    }
+</script>
+</body>
+</html>
