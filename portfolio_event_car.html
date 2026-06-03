@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>인터넷활용 실습 템플릿</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* 트랙(자동차가 움직일 박스) 스타일 */
+    #track {
+        position: relative; /* 자동차의 기준점이 됨 */
+        width: 100%;
+        max-width: 600px;   /* 트랙 최대 너비 */
+        height: 400px;      /* 트랙 높이 */
+        background-color: #d1d8e0; /* 레트로한 아스팔트 느낌의 배경색 */
+        border: 4px dashed #4b6584; /* 도로 경계선 느낌의 테두리 */
+        margin: 20px 0;
+        border-radius: 10px;
+        overflow: hidden; 
+    }
+
+    /* 자동차 스타일 (이모지 및 레트로 효과) */
+    #car {
+        position: absolute; 
+        left: 0px;        
+        top: 0px;         
+        width: 50px; 
+        height: 50px;
+        font-size: 40px; /* 이모지 크기 */
+        line-height: 50px;
+        text-align: center;
+        text-shadow: 2px 2px 0px rgba(0,0,0,0.5); /* 레트로한 그림자 효과 */
+        transition: transform 0.1s ease; /* 방향 전환 시 부드러운 애니메이션 */
+        z-index: 10;
+        
+        /* 자동차 이모지(🚙)는 기본적으로 왼쪽을 봅니다. 그대로 둡니다. */
+        transform: scaleX(1); 
+    }
+    
+    /* 좌표 정보 박스 스타일 */
+    #info {
+        display: inline-block;
+        padding: 10px 20px; 
+        background: #eee; 
+        border: 2px solid #aaa;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>이름: 박예인</h1>
+  <p class="subtitle">한 줄 소개: 26학번</p>
+</header>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="contact.html">Contact</a>
+</nav>
+<main class="container">
+<section>
+  <h3>실습 6: 키보드 자동차</h3>
+    <p>방향키(←, ↑, →, ↓)를 눌러 박스 안에서 자유롭게 운전해보세요.</p>
+    
+    <div id="track">
+        <div id="car">🚙</div>
+    </div>
+    
+    <div id="info">현재 좌표 (x, y) = (0, 0)</div>
+</section>
+</main>
+<footer>
+  <small>&copy; <span id="year"></span> 이름: 박예인</small>
+</footer>
+<script src="script.js"></script>
+
+<script>
+    var x = 0; // 초기 x좌표
+    var y = 0; // 초기 y좌표
+    var step = 15; // 이동 거리 (속도)
+
+    window.onload = function() {
+        var car = document.getElementById("car");
+        var track = document.getElementById("track");
+        var info = document.getElementById("info");
+
+        // 페이지 로드 시 초기 좌표 적용 및 초기 방향(왼쪽) 설정
+        car.style.left = x + "px";
+        car.style.top = y + "px";
+        car.style.transform = "scaleX(1)"; // 초기 상태: 왼쪽 바라보기 (기본값)
+
+        document.onkeydown = function(e) {
+            // 화살표 키 입력 시 화면이 스크롤되는 것 방지
+            if([37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+                e.preventDefault();
+            }
+
+            // 트랙과 자동차의 실제 크기를 가져와서 이탈 방지 계산에 사용
+            var trackWidth = track.clientWidth;
+            var trackHeight = track.clientHeight;
+            var carWidth = car.clientWidth;
+            var carHeight = car.clientHeight;
+
+            switch(e.keyCode) {
+                case 37: // [왼쪽]
+                    x -= step;
+                    // 왼쪽 바라보기 (이모지 기본 상태)
+                    car.style.transform = "scaleX(1)"; 
+                    // 왼쪽 이탈 방지
+                    if (x < 0) x = 0; 
+                    break;
+                case 38: // [위쪽]
+                    y -= step;
+                    // 위로 갈 때는 오른쪽으로 90도 회전해야 앞머리가 위를 향함 (이모지가 왼쪽을 보므로)
+                    car.style.transform = "rotate(90deg)"; 
+                    // 위쪽 이탈 방지
+                    if (y < 0) y = 0; 
+                    break;
+                case 39: // [오른쪽]
+                    x += step;
+                    // 오른쪽 바라보기 (좌우 반전)
+                    car.style.transform = "scaleX(-1)"; 
+                    // 오른쪽 이탈 방지 (트랙 너비 - 자동차 너비)
+                    if (x > trackWidth - carWidth) x = trackWidth - carWidth; 
+                    break;
+                case 40: // [아래쪽]
+                    y += step;
+                    // 아래로 갈 때는 왼쪽으로 90도 회전해야 앞머리가 아래를 향함
+                    car.style.transform = "rotate(-90deg)"; 
+                    // 아래쪽 이탈 방지 (트랙 높이 - 자동차 높이)
+                    if (y > trackHeight - carHeight) y = trackHeight - carHeight; 
+                    break;
+            }
+
+            // 변경된 좌표를 실제 DOM 요소에 적용
+            car.style.left = x + "px";
+            car.style.top = y + "px";
+
+            // 좌표 정보 출력
+            info.innerHTML = "현재 좌표 (x, y) = (" + x + ", " + y + ")";
+        }
+    }
+</script>
+</body>
+</html>
