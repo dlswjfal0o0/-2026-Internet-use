@@ -53,6 +53,14 @@
       border: 2px inset #888;
       margin: 0 5px;
     }
+    
+    /* [추가] 최소 주문 금액 안내 메시지 스타일 */
+    .min-order-msg {
+      font-size: 14px;
+      margin-top: 8px;
+      font-weight: normal;
+      height: 20px; /* 고정 높이를 주어 텍스트가 바뀔 때 화면이 덜덜거리지 않게 함 */
+    }
 
     /* 3. 눌리는 느낌의 버튼 스타일 */
     .retro-btn {
@@ -65,14 +73,24 @@
       font-weight: bold;
       cursor: pointer;
       box-shadow: 2px 2px 0px #000;
-      transition: transform 0.05s, box-shadow 0.05s;
+      transition: transform 0.05s, box-shadow 0.05s, background-color 0.2s;
     }
-    .retro-btn:active {
+    .retro-btn:active:not(:disabled) { /* 비활성화 상태가 아닐 때만 눌리는 효과 */
       border: 2px solid #000;
       border-bottom-color: #fff;
       border-right-color: #fff;
       transform: translate(2px, 2px);
       box-shadow: 0px 0px 0px #000;
+    }
+
+    /* [추가] 비활성화(disabled)된 버튼 스타일 */
+    .retro-btn:disabled {
+      background-color: #888;
+      color: #555;
+      cursor: not-allowed; /* 금지 마커 표시 */
+      border: 2px solid #555;
+      box-shadow: none; /* 그림자를 없애서 튀어나와 보이지 않게 함 */
+      transform: translate(2px, 2px); /* 이미 눌려있는 듯한 위치로 고정 */
     }
 
     /* 우편번호 찾기 등 작은 버튼을 위한 추가 스타일 */
@@ -145,6 +163,7 @@
 
         <div class="total-wrapper">
             주문 합계: <input type="text" id="total" value="0" readonly>원
+            <div id="minOrderMsg" class="min-order-msg" style="color: #d32f2f;">최소 주문 금액은 15,000원입니다.</div>
         </div>
         <br>
 
@@ -171,7 +190,7 @@
         </div>
         <br>
 
-        <input type="submit" class="retro-btn" value="주문하기">
+        <input type="submit" id="submitBtn" class="retro-btn" value="주문하기" disabled>
         <input type="reset" class="retro-btn" value="초기화" onclick="setTimeout(recalc, 0)">
     </form>
 </section>
@@ -182,11 +201,15 @@
 <script src="script.js"></script>
 
 <script>
-    /* 메뉴 가격 계산 */
+    /* 메뉴 가격 계산 및 최소 주문 금액 제어 */
     function recalc() {
         var total = 0; 
+        var minOrder = 15000; // 최소 주문 금액 설정 (15,000원)
+        
         var checks = document.getElementsByClassName("menu-check");
         var qtys = document.getElementsByClassName("menu-qty");
+        var submitBtn = document.getElementById("submitBtn");
+        var msgDiv = document.getElementById("minOrderMsg");
 
         for (var i = 0; i < checks.length; i++) {
             if (checks[i].checked) { 
@@ -200,6 +223,22 @@
             }
         }
         document.getElementById("total").value = total;
+
+        // [추가] 최소 주문 금액 조건 확인 로직
+        if (total === 0) {
+            msgDiv.innerHTML = "최소 주문 금액은 " + minOrder.toLocaleString() + "원입니다.";
+            msgDiv.style.color = "#d32f2f"; // 빨간색
+            submitBtn.disabled = true;      // 버튼 비활성화
+        } else if (total < minOrder) {
+            var diff = minOrder - total;
+            msgDiv.innerHTML = "주문하려면 " + diff.toLocaleString() + "원이 더 필요합니다!";
+            msgDiv.style.color = "#d32f2f"; // 빨간색
+            submitBtn.disabled = true;      // 버튼 비활성화
+        } else {
+            msgDiv.innerHTML = "🎉 주문 가능한 금액입니다!";
+            msgDiv.style.color = "#2e7d32"; // 초록색
+            submitBtn.disabled = false;     // 버튼 활성화
+        }
     }
 
     /* 우편번호 검색 API */
@@ -230,14 +269,8 @@
         var addr = document.getElementById("addr").value;
         var detailAddr = document.getElementById("detailAddr").value;
         
-        // 1. 메뉴 선택 여부 확인
-        if (total == 0) {
-            alert("상품을 적어도 하나는 선택해야 주문 가능합니다.");
-            e.preventDefault(); 
-            return false;
-        }
+        // (최소 금액 검사는 버튼 비활성화로 이미 막았으므로 여기서는 생략해도 되지만 2중 체크용으로 남겨둘 수 있습니다)
 
-        // 2. 고객명 확인
         if (customerName.trim() == "") {
             alert("고객명을 입력해주세요!");
             document.getElementById("customerName").focus();
@@ -245,7 +278,6 @@
             return false;
         }
 
-        // 3. 전화번호 확인
         if (phone.trim() == "") {
             alert("전화번호를 입력해주세요!");
             document.getElementById("phone").focus();
@@ -253,14 +285,12 @@
             return false;
         }
 
-        // 4. 주소 검색 여부 확인
         if (addr == "") {
             alert("우편번호 찾기를 통해 배달 주소를 입력해주세요!");
             e.preventDefault();
             return false;
         }
 
-        // 5. 상세 주소 확인
         if (detailAddr.trim() == "") {
             alert("상세 주소(동, 호수 등)를 입력해주세요!");
             document.getElementById("detailAddr").focus();
@@ -268,7 +298,6 @@
             return false;
         }
 
-        // 6. 모든 검사 통과 시 완료 알림 (입력한 정보들 포함)
         alert("주문이 완료되었습니다!\n\n" +
               "- 고객명: " + customerName + "\n" +
               "- 배달주소: " + addr + " " + detailAddr + "\n" +
